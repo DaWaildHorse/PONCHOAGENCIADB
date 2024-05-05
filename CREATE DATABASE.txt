@@ -1,0 +1,156 @@
+DROP DATABASE PONCHOAGENCIA;
+CREATE DATABASE IF NOT EXISTS PONCHOAGENCIA;
+USE PONCHOAGENCIA;
+CREATE TABLE Circuito (
+    idCircuito INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    descripcion VARCHAR(50) NOT NULL,
+    ciudadLlegada VARCHAR(50) NOT NULL,
+    paísLlegada VARCHAR(50) NOT NULL,
+    duración INT NOT NULL,
+    precio FLOAT NOT NULL,
+    nbPersonas INT NOT NULL
+) ENGINE=InnoDB;
+CREATE TABLE Ciudad (
+    nombreCiudad VARCHAR(50) NOT NULL,
+    nombrePaís VARCHAR(50) NOT NULL,
+    PRIMARY KEY (nombreCiudad, nombrePaís)
+) ENGINE=InnoDB;
+
+CREATE TABLE Cliente (
+    idCliente INT AUTO_INCREMENT PRIMARY KEY,
+    nombreCliente VARCHAR(50) NOT NULL,
+    tipoCliente VARCHAR(20) NOT NULL,
+    añoRegistro INT NOT NULL
+) ENGINE=InnoDB;
+
+CREATE TABLE Cuartos (
+    idCuarto INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    numCuarto INT NOT NULL,
+    precioCuarto FLOAT NOT NULL,
+    precioDesayuno FLOAT NOT NULL,
+    hotelID INT NOT NULL
+) ENGINE=InnoDB;
+
+-- Cambiar al contexto de la base de datos PONCHOAGENCIA
+
+-- Crear la tabla Etapa
+CREATE TABLE Etapa (
+    idEtapa INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    idCircuito INT NOT NULL,
+    orden INT NOT NULL,
+    nombreLugar VARCHAR(50) NOT NULL,
+    nombreCiudad VARCHAR(50) NOT NULL,
+    nombrePaís VARCHAR(50) NOT NULL,
+    duración INT NOT NULL,
+    idHotel INT NOT NULL,
+    idLugarAvisitar VARCHAR(36) NOT NULL
+) ENGINE=InnoDB;
+
+
+USE PONCHOAGENCIA;
+
+-- Crear la tabla FechaCircuito
+CREATE TABLE FechaCircuito (
+    idCircuito INT NOT NULL PRIMARY KEY,
+    fechaSalida DATE NOT NULL
+) ENGINE=InnoDB;
+CREATE TABLE Hotel (
+    idHotel INT AUTO_INCREMENT NOT NULL
+ PRIMARY KEY,
+    nombreHotel VARCHAR(50) NOT NULL,
+    nombreCiudad VARCHAR(50) NOT NULL,
+    nombrePaís VARCHAR(50) NOT NULL,
+    dirección VARCHAR(100) NOT NULL,
+    numCuartos INT NOT NULL,
+    precioCuarto INT NOT NULL,
+    precioDesayuno INT NOT NULL
+) ENGINE=InnoDB;
+CREATE TABLE LugarAvisitar (
+    idLugar VARCHAR(36) NOT NULL PRIMARY KEY,
+    nombreLugar VARCHAR(50) NOT NULL,
+    nombreCiudad VARCHAR(50) NOT NULL,
+    nombrePaís VARCHAR(50) NOT NULL,
+    TipoLugar VARCHAR(50) NOT NULL,
+    dirección VARCHAR(100) NOT NULL,
+    descripción VARCHAR(200) NOT NULL,
+    precio FLOAT NOT NULL
+) ENGINE=InnoDB;
+CREATE TABLE País (
+    nombrePaís VARCHAR(50) NOT NULL PRIMARY KEY
+) ENGINE=InnoDB;
+-- Cambiar al contexto de la base de datos PONCHOAGENCIA
+USE PONCHOAGENCIA;
+
+-- Crear la tabla Reservaciones
+CREATE TABLE Reservaciones (
+    idReservación INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    idCliente INT NOT NULL,
+    fechaSolicitud DATE NOT NULL,
+    fechaSalida DATE NOT NULL,
+    fechaLlegada DATE NOT NULL,
+    nbPersonas INT NOT NULL,
+    idCircuito INT NOT NULL,
+    idHotel INT NOT NULL,
+    fechaCaducidad DATE NOT NULL
+) ENGINE=InnoDB;
+CREATE TABLE ReservacionesCircuitos (
+    idReservación INT NOT NULL PRIMARY KEY,
+    idCircuito INT NOT NULL
+);
+CREATE TABLE Simulaciones (
+    idSimulacion INT AUTO_INCREMENT NOT NULL PRIMARY KEY,
+    NombreUsuario INT NOT NULL,
+    fechaSolicitud DATE NOT NULL,
+    fechaSalida DATE NOT NULL,
+    fechaLlegada DATE NOT NULL,
+    nbPersonas INT NOT NULL,
+    idCircuito INT NOT NULL,
+    idHotel INT NOT NULL,
+    fechaCaducidad DATE NOT NULL,
+    PrecioTotal FLOAT NOT NULL
+);
+
+
+
+ALTER TABLE Circuito ADD CONSTRAINT fk_ciudad_pais FOREIGN KEY (ciudadLlegada, paísLlegada) REFERENCES Ciudad (nombreCiudad, nombrePaís);
+ALTER TABLE Ciudad
+ADD CONSTRAINT fk_nombrePaís FOREIGN KEY (nombrePaís) REFERENCES País (nombrePaís);
+ALTER TABLE Cuartos
+ADD CONSTRAINT fk_hotelID FOREIGN KEY (hotelID) REFERENCES Hotel (idHotel);
+ALTER TABLE Etapa
+ADD CONSTRAINT fk_idCircuito FOREIGN KEY (idCircuito) REFERENCES Circuito (idCircuito);
+ALTER TABLE Etapa
+ADD CONSTRAINT fk_nombreCiudad_nombrePaís FOREIGN KEY (nombreCiudad, nombrePaís) REFERENCES Ciudad (nombreCiudad, nombrePaís);
+ALTER TABLE Etapa
+ADD CONSTRAINT fk_idHotel FOREIGN KEY (idHotel) REFERENCES Hotel (idHotel);
+ALTER TABLE Etapa
+ADD CONSTRAINT fk_idLugarAvisitar FOREIGN KEY (idLugarAvisitar) REFERENCES LugarAvisitar (idLugar);
+ALTER TABLE FechaCircuito
+ADD CONSTRAINT fk_idCircuito FOREIGN KEY (idCircuito) REFERENCES Circuito (idCircuito);
+ALTER TABLE LugarAvisitar
+ADD CONSTRAINT fk_nombreCiudad_nombrePaís FOREIGN KEY (nombreCiudad, nombrePaís) REFERENCES Ciudad (nombreCiudad, nombrePaís);
+
+ALTER TABLE Reservaciones
+ADD CONSTRAINT fk_reservaciones_cliente
+FOREIGN KEY (idCliente) REFERENCES Cliente(idCliente);
+
+-- Agregar la restricción de clave externa para idCircuito en la tabla Reservaciones
+ALTER TABLE Reservaciones
+ADD CONSTRAINT fk_reservaciones_circuito
+FOREIGN KEY (idCircuito) REFERENCES Circuito(idCircuito);
+
+-- Agregar la restricción de clave externa para idHotel en la tabla Reservaciones
+ALTER TABLE Reservaciones
+ADD CONSTRAINT fk_reservaciones_hotel
+FOREIGN KEY (idHotel) REFERENCES Hotel(idHotel);
+-- Agregar la restricción de clave externa para idReservación
+ALTER TABLE ReservacionesCircuitos
+ADD CONSTRAINT fk_idReservación
+FOREIGN KEY (idReservación) REFERENCES Reservaciones(idReservación);
+
+-- Agregar la restricción de clave externa para NombreUsuario
+ALTER TABLE Simulaciones
+ADD CONSTRAINT fk_NombreUsuario
+FOREIGN KEY (NombreUsuario) REFERENCES Cliente(idCliente);
+
+
